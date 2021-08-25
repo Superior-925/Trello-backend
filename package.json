@@ -1,0 +1,52 @@
+{
+  "name": "trello-server-express",
+  "version": "1.0.0",
+  "description": " Trello app server side based on ExpressJS and PostgreSQL",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "DB_NAME=trello-dev nodemon src/index.js",
+    "start": "DB_NAME=trello-dev node src/index.js",
+    "db:create": "sequelize-cli db:create",
+    "db:migrate": "sequelize-cli db:migrate",
+    "db:migrate:undo": "sequelize-cli db:migrate:undo",
+    "db:create-test": "sequelize-cli --env test db:create",
+    "db:migrate-test": "sequelize-cli --env test db:migrate",
+    "test": "PORT=5000 DB_NAME=trello-test NODE_ENV=test mocha --exit",
+    "keys:generate": "node src/generateKeypair.js"
+  },
+  "keywords": [],
+  "author": "Antony Logunov",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Superior-925/Trello-backend.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.6.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "helmet": "^4.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "passport": "^0.4.1",
+    "passport-google-oauth2": "^0.2.0",
+    "passport-jwt": "^4.0.0",
+    "pg": "^8.6.0",
+    "sequelize": "^6.6.5",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "chai-http": "^4.3.0",
+    "eslint": "^7.30.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.23.4",
+    "mocha": "^8.4.0",
+    "nodemon": "^2.0.10",
+    "sequelize-cli": "^6.2.0",
+    "supertest": "^6.1.3"
+  }
+}
