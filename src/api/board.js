@@ -6,8 +6,6 @@ const crypto = require('crypto');
 const User = require('../models/user');
 const Board = require('../models/board');
 const Userboards = require('../models/user-boards');
-const BoardClass = require('../constructors/board-class');
-const UserClass = require('../constructors/user-class');
 
 const router = express.Router();
 
@@ -29,7 +27,9 @@ router.post('/board', passport.authenticate('jwt', { session: false }),
               user.addBoard(board, { through: { owner: true } }).then(() => {
                 res.send(board);
               });
+              return null;
             });
+          return null;
         });
     } catch (error) {
       res.status(500).send({ message: error.message });
@@ -43,13 +43,9 @@ router.get('/board', passport.authenticate('jwt', { session: false }), (req, res
       .then((user) => {
         if (!user) return res.status(404).json({ message: 'User not found!' });
         user.getBoards().then((boards) => {
-          const boardsArray = [];
-          for (board of boards) {
-            const newBoard = new BoardClass(board.dataValues.boardName, board.dataValues.id);
-            boardsArray.push(newBoard);
-          }
-          res.send(boardsArray);
+          res.send(boards);
         });
+        return null;
       });
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -65,15 +61,16 @@ router.delete('/board', passport.authenticate('jwt', { session: false }), (req, 
       .then((user) => {
         if (!user) return res.status(404).json({ message: 'User not found!' });
         user.getBoards().then((boards) => {
-          for (board of boards) {
+          boards.forEach((board) => {
             if (board.dataValues.id == boardId) {
               board.destroy();
               board.userboard.destroy();
               const resJson = JSON.stringify(board.dataValues.id);
               res.send(resJson);
             }
-          }
+          });
         });
+        return null;
       });
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -89,6 +86,7 @@ router.put('/board', passport.authenticate('jwt', { session: false }), (req, res
       board.boardName = boardName;
       board.save();
       res.send(board);
+      return null;
     });
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -123,7 +121,7 @@ router.post('/board/invitation', passport.authenticate('jwt', { session: false }
     }
   });
 
-router.get('/board/invitation/:link', passport.authenticate('jwt', { session: false }), (req, res) => {
+router.post('/board/invitation/:link', passport.authenticate('jwt', { session: false }), (req, res) => {
   try {
     const { link } = req.params;
     const { userId } = req.query;
@@ -135,36 +133,23 @@ router.get('/board/invitation/:link', passport.authenticate('jwt', { session: fa
 
     const decryptBoard = decipher.final('ascii');
 
-    // Userboards.findOne({ where: { userId: userId, boardId: decryptBoard } }).then((board) => {
-    //   if (!board) return res.status(404).json({ message: 'Board not found!' });
-    //   if (board.owner !== true && board.userId !== userId) {
-    //     User.findByPk(userId)
-    //       .then((user) => {
-    //         if (!user) return res.status(404).json({ message: 'User not found!' });
-    //         Board.findByPk(decryptBoard)
-    //           .then((board) => {
-    //             if (!board) res.status(404).json({ message: 'Board not found!' });
-    //             user.addBoard(board, { through: { owner: false } }).then(() => {
-    //               res.status(200).json({ message: 'Successful' });
-    //             });
-    //           });
-    //       });
-    //   } else {
-    //     res.status(409).json({ message: 'Error, you are owner' });
-    //   }
-    // });
-
-    User.findByPk(userId)
-      .then((user) => {
-        if (!user) return res.status(404).json({ message: 'User not found!' });
-        Board.findByPk(decryptBoard)
-          .then((board) => {
-            if (!board) res.status(404).json({ message: 'Board not found!' });
-            user.addBoard(board, { through: { owner: false } }).then(() => {
-              res.status(200).json({ message: 'Successful' });
+    Userboards.findOne({ where: { boardId: decryptBoard } }).then((board) => {
+      if (!board) return res.status(404).json({ message: 'Board not found!' });
+      if (board.userId == userId) { return res.status(409).json({ message: 'Error, you are owner' }); }
+      User.findByPk(userId)
+        .then((user) => {
+          if (!user) return res.status(404).json({ message: 'User not found!' });
+          Board.findByPk(decryptBoard)
+            .then((board) => {
+              if (!board) res.status(404).json({ message: 'Board not found!' });
+              user.addBoard(board, { through: { owner: false } }).then(() => {
+                res.status(200).json({ message: 'Successful' });
+              });
             });
-          });
-      });
+          return null;
+        });
+      return null;
+    });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
@@ -178,13 +163,9 @@ router.get('/board/invitation/users/:board', passport.authenticate('jwt', { sess
       .then((board) => {
         if (!board) return res.status(404).json({ message: 'Board not found!' });
         board.getUsers().then((users) => {
-          const usersArray = [];
-          for (user of users) {
-            const newUser = new UserClass(user.dataValues.id, user.dataValues.email);
-            usersArray.push(newUser);
-          }
-          res.send(usersArray);
+          res.send(users);
         });
+        return null;
       });
   } catch (error) {
     res.status(500).send({ message: error.message });
@@ -199,6 +180,7 @@ router.get('/board/rights', passport.authenticate('jwt', { session: false }), (r
     Userboards.findOne({ where: { userId, boardId } }).then((board) => {
       if (!board) return res.status(404).json({ message: 'Board not found!' });
       res.send(board);
+      return null;
     });
   } catch (error) {
     res.status(500).send({ message: error.message });

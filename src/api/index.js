@@ -3,7 +3,7 @@ const registerApi = require('./registration');
 const loginApi = require('./login');
 const boardAdd = require('./board');
 const taskAdd = require('./task');
-const test = require('./test');
+const test = require('../../test/test');
 
 const router = express.Router();
 

@@ -11,25 +11,16 @@ module.exports = {
         allowNull: false,
         unique: false,
         type: Sequelize.INTEGER,
-      },
-      taskTitle: {
-        allowNull: false,
-        unique: false,
-        type: Sequelize.STRING,
+        onDelete: 'CASCADE',
+        references: {
+          model: 'tasks',
+          key: 'id',
+        },
       },
       action: {
         allowNull: true,
         unique: false,
         type: Sequelize.STRING,
-      },
-      boardId: {
-        allowNull: false,
-        type: Sequelize.INTEGER,
-        onDelete: 'CASCADE',
-        references: {
-          model: 'boards',
-          key: 'id',
-        },
       },
       createdAt: {
         allowNull: false,

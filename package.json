@@ -4,8 +4,9 @@
   "description": " Trello app server side based on ExpressJS and PostgreSQL",
   "main": "src/index.js",
   "scripts": {
-    "dev": "DB_NAME=trello-dev nodemon src/index.js",
-    "start": "DB_NAME=trello-dev node src/index.js",
+    "dev": "nodemon -r dotenv/config src/index.js",
+    "start:test": "DB_NAME=trello-test nodemon -r dotenv/config src/index.js",
+    "start": "node src/index.js",
     "db:create": "sequelize-cli db:create",
     "db:migrate": "sequelize-cli db:migrate",
     "db:migrate:undo": "sequelize-cli db:migrate:undo",

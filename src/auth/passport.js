@@ -43,28 +43,7 @@ module.exports = (passport) => {
   // The JWT payload is passed into the verify callback
   passport.use(
     new JwtStrategy(options, (jwt_payload, done) => {
-      //console.log(jwt_payload);
-
-      User.findByPk(jwt_payload.sub).then((result)=> {
-        return done(null, result);
-      }).catch((err) => console.log(err));
-
-      // We will assign the `sub` property on the JWT to the database ID of user
-      // User.findOne({ where: { id: jwt_payload.sub } }, (err, user) => {
-      //   // This flow look familiar?  It is the same as when we implemented
-      //   // the `passport-local` strategy
-      //   if (err) {
-      //     console.log('User found');
-      //     return done(err, false);
-      //   }
-      //
-      //   if (user) {
-      //     console.log('User found');
-      //     return done(null, user);
-      //   }
-      //
-      //   return done(null, false, { message: 'User not found' });
-      // });
+      User.findByPk(jwt_payload.sub).then((result) => done(null, result)).catch((err) => console.log(err));
     }),
   );
 };

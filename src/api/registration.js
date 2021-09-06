@@ -1,6 +1,4 @@
 const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const RefreshToken = require('../models/refresh-token');
 const utils = require('../lib/utils');
@@ -25,6 +23,7 @@ const issueTokensPair = async (userId) => {
   } catch (e) {
     console.log(e);
   }
+  return null;
 };
 
 router.post('/signup', async (req, res) => {
@@ -59,6 +58,7 @@ router.post('/signup', async (req, res) => {
       ...tokenPair,
     });
   }
+  return null;
 });
 
 router.post('/signup/google', async (req, res) => {

@@ -8,7 +8,7 @@ const router = express.Router();
 const issueTokensPair = async (userId) => {
   try {
     const newRefreshToken = new RefreshToken({
-      userId: userId,
+      userId,
       token: utils.issueRefreshToken(),
     });
 
@@ -23,6 +23,7 @@ const issueTokensPair = async (userId) => {
   } catch (error) {
     console.log(error);
   }
+  return null;
 };
 
 router.post('/login', async (req, res) => {
@@ -57,10 +58,10 @@ router.post('/login', async (req, res) => {
   } else {
     res.status(401).json({ success: false, message: 'you entered the wrong password' });
   }
+  return null;
 });
 
 router.post('/logout', async (req, res, next) => {
-
   const { accessToken } = req.body;
 
   if (!accessToken) {
@@ -68,7 +69,7 @@ router.post('/logout', async (req, res, next) => {
   }
 
   const token = accessToken.replace('Bearer ', '');
-  const data = utils.verifyToken(token, true); //ignore expiration here
+  const data = utils.verifyToken(token, true); // ignore expiration here
 
   try {
     await RefreshToken.destroy({ where: { userId: data.sub } });
@@ -79,6 +80,7 @@ router.post('/logout', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+  return null;
 });
 
 router.post('/refresh', async (req, res, next) => {
@@ -107,6 +109,7 @@ router.post('/refresh', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+  return null;
 });
 
 module.exports = router;

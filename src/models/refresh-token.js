@@ -20,6 +20,6 @@ const RefreshToken = sequelize.define('refreshtoken', {
   },
 });
 
-User.hasOne(RefreshToken, { onDelete: 'cascade' });
+User.hasMany(RefreshToken, { onDelete: 'cascade' });
 
 module.exports = RefreshToken;

@@ -16,16 +16,6 @@ const Taskexecutor = sequelize.define('taskexecutor', {
     unique: false,
     type: DataTypes.BOOLEAN,
   },
-  boardId: {
-    allowNull: false,
-    unique: false,
-    type: DataTypes.INTEGER,
-  },
-  userEmail: {
-    allowNull: false,
-    unique: false,
-    type: DataTypes.STRING,
-  },
 },
 {
   timestamps: false,

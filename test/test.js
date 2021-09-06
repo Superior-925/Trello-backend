@@ -1,5 +1,5 @@
 const express = require('express');
-const Board = require('../models/board');
+const Board = require('../src/models/board');
 
 const router = express.Router();
 

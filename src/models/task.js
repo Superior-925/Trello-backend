@@ -3,6 +3,7 @@ const sequelize = require('../database');
 const Board = require('./board');
 
 const Task = sequelize.define('task', {
+  //todo: move columns to a separate table
   listName: {
     allowNull: false,
     unique: false,
@@ -51,6 +52,7 @@ const Task = sequelize.define('task', {
   },
 });
 
-Board.hasMany(Task, { onDelete: "cascade" });
+Board.hasMany(Task, { onDelete: 'cascade' });
+Task.belongsTo(Board);
 
 module.exports = Task;

@@ -12,16 +12,6 @@ module.exports = {
         unique: false,
         type: Sequelize.BOOLEAN,
       },
-      boardId: {
-        allowNull: false,
-        unique: false,
-        type: Sequelize.INTEGER,
-      },
-      userEmail: {
-        allowNull: false,
-        unique: false,
-        type: Sequelize.STRING,
-      },
       taskId: {
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',

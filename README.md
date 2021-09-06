@@ -69,6 +69,12 @@ $ npm run db:migrate
 $ npm run dev
 ```
 
+ - To start the server with a test database (don't forget to create one), enter the command
+ 
+  ```sh
+ $ npm run start:test
+ ```
+
 ## To test the server run the following commands
 
 - Create test database
