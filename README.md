@@ -42,7 +42,7 @@ PORT
 DB_HOST
 DB_USERNAME
 DB_PASSWORD
-JWT_SECRET
+DB_NAME
  ```
 
 - Install dependencies by NPM
