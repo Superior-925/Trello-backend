@@ -1,24 +1,9 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
-const Board = require('./board');
+//const Board = require('./board');
 
 const Task = sequelize.define('task', {
   //todo: move columns to a separate table
-  listName: {
-    allowNull: false,
-    unique: false,
-    type: DataTypes.STRING,
-    validate: {
-      notNull: {
-        args: true,
-        msg: 'List name is missing',
-      },
-      notEmpty: {
-        args: true,
-        msg: 'List name is required',
-      },
-    },
-  },
   taskTitle: {
     allowNull: false,
     unique: false,
@@ -52,7 +37,7 @@ const Task = sequelize.define('task', {
   },
 });
 
-Board.hasMany(Task, { onDelete: 'cascade' });
-Task.belongsTo(Board);
+// Board.hasMany(Task, { onDelete: 'cascade' });
+// Task.belongsTo(Board);
 
 module.exports = Task;

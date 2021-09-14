@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const User = require('../models/user');
 const Board = require('../models/board');
 const Userboards = require('../models/user-boards');
+const List = require('../models/lists-tasks');
 
 const router = express.Router();
 
@@ -16,7 +17,9 @@ router.post('/board', passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     try {
       const { boardName, userId } = req.body;
-      console.log(`UserId ${userId}`);
+      // console.log(`UserId ${userId}`);
+
+      const respArray = [];
       await Board.create({ boardName }).catch((err) => console.log(err));
       User.findByPk(userId)
         .then((user) => {
@@ -24,7 +27,11 @@ router.post('/board', passport.authenticate('jwt', { session: false }),
           Board.findOne({ where: { boardName } })
             .then((board) => {
               if (!board) return res.status(404).json({ message: 'Board not found!' });
+              board.createList([{ listName: 'To Do' }, { listName: 'In Progress' }, { listName: 'Coded' },
+                { listName: 'Testing' }, { listName: 'Done' }]).then((lists) => respArray.push(lists));
               user.addBoard(board, { through: { owner: true } }).then(() => {
+                respArray.push(board);
+                console.log(respArray);
                 res.send(board);
               });
               return null;
@@ -62,7 +69,7 @@ router.delete('/board', passport.authenticate('jwt', { session: false }), (req, 
         if (!user) return res.status(404).json({ message: 'User not found!' });
         user.getBoards().then((boards) => {
           boards.forEach((board) => {
-            if (board.dataValues.id == boardId) {
+            if (board.dataValues.id === +boardId) {
               board.destroy();
               board.userboard.destroy();
               const resJson = JSON.stringify(board.dataValues.id);
@@ -135,7 +142,7 @@ router.post('/board/invitation/:link', passport.authenticate('jwt', { session: f
 
     Userboards.findOne({ where: { boardId: decryptBoard } }).then((board) => {
       if (!board) return res.status(404).json({ message: 'Board not found!' });
-      if (board.userId == userId) { return res.status(409).json({ message: 'Error, you are owner' }); }
+      if (board.userId === +userId) { return res.status(409).json({ message: 'Error, you are owner' }); }
       User.findByPk(userId)
         .then((user) => {
           if (!user) return res.status(404).json({ message: 'User not found!' });

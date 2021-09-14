@@ -7,11 +7,11 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      listName: {
-        allowNull: false,
-        unique: false,
-        type: Sequelize.STRING,
-      },
+      // listName: {
+      //   allowNull: false,
+      //   unique: false,
+      //   type: Sequelize.STRING,
+      // },
       taskTitle: {
         allowNull: false,
         unique: false,
@@ -33,15 +33,24 @@ module.exports = {
         unique: false,
         type: Sequelize.INTEGER,
       },
-      boardId: {
+      listId: {
         allowNull: false,
         type: Sequelize.INTEGER,
         onDelete: 'CASCADE',
         references: {
-          model: 'boards',
+          model: 'lists',
           key: 'id',
         },
       },
+      // boardId: {
+      //   allowNull: false,
+      //   type: Sequelize.INTEGER,
+      //   onDelete: 'CASCADE',
+      //   references: {
+      //     model: 'boards',
+      //     key: 'id',
+      //   },
+      // },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

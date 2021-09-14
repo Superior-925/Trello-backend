@@ -7,6 +7,7 @@ const Board = require('../models/board');
 const User = require('../models/user');
 const Taskexecutor = require('../models/task-executor');
 const TaskAction = require('../models/task-action');
+const List = require('../models/lists-tasks');
 
 const router = express.Router();
 
@@ -26,10 +27,14 @@ router.post('/task', passport.authenticate('jwt', { session: false }),
       } = req.body;
       Board.findByPk(boardId).then((board) => {
         if (!board) return res.status(404).json({ message: 'Board not found!' });
-        board.createTask({ listName, taskTitle, order }).then((task) => {
-          taskAction(task.dataValues.id, 'Adding a task');
-          const newTask = task.get({ plain: true });
-          res.send(newTask);
+        board.createList({ listName }).then((list) => {
+          list.createTask({ taskTitle, order }).then((task) => {
+            taskAction(task.dataValues.id, 'Adding a task');
+            Task.findOne({ where: { id: task.dataValues.id }, include: { model: List } }).then((getTask) => {
+              const newTask = getTask.get({ plain: true });
+              res.status(200).send(newTask);
+            });
+          });
         }).catch((err) => console.log(err));
         return null;
       });
@@ -42,11 +47,12 @@ router.get('/task', passport.authenticate('jwt', { session: false }),
   (req, res) => {
     try {
       const boardId = req.query.param;
+
       Board.findByPk(boardId).then((board) => {
         if (!board) return res.status(404).json({ message: 'Board not found!' });
-        board.getTasks({ where: { archived: false } })
-          .then((tasks) => {
-            res.send(tasks);
+        board.getLists({ include: [{ model: Task, where: { archived: false } }] })
+          .then((listsTasks) => {
+            res.status(200).send(listsTasks);
           })
           .catch((err) => console.log(err));
         return null;
@@ -309,11 +315,12 @@ router.get('/task/actions:board', passport.authenticate('jwt', { session: false 
   (req, res) => {
     try {
       const boardId = req.params;
+
       Board.findByPk(boardId.board).then((board) => {
         if (!board) return res.status(404).json({ message: 'Board not found!' });
-        board.getTasks({ include: { model: TaskAction } })
-          .then((tasks) => {
-            res.send(tasks);
+        board.getLists({ include: [{ model: Task, include: TaskAction }] })
+          .then((tasksActions) => {
+            res.status(200).send(tasksActions);
           })
           .catch((err) => console.log(err));
         return null;
@@ -321,6 +328,21 @@ router.get('/task/actions:board', passport.authenticate('jwt', { session: false 
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
+
+    // try {
+    //   const boardId = req.params;
+    //   Board.findByPk(boardId.board).then((board) => {
+    //     if (!board) return res.status(404).json({ message: 'Board not found!' });
+    //     board.getTasks({ include: { model: TaskAction } })
+    //       .then((tasks) => {
+    //         res.send(tasks);
+    //       })
+    //       .catch((err) => console.log(err));
+    //     return null;
+    //   });
+    // } catch (error) {
+    //   res.status(500).send({ message: error.message });
+    // }
   });
 
 router.put('/task/list:taskId', passport.authenticate('jwt', { session: false }),
