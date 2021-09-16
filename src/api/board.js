@@ -17,9 +17,9 @@ router.post('/board', passport.authenticate('jwt', { session: false }),
   async (req, res) => {
     try {
       const { boardName, userId } = req.body;
-      // console.log(`UserId ${userId}`);
 
-      const respArray = [];
+      const response = {};
+
       await Board.create({ boardName }).catch((err) => console.log(err));
       User.findByPk(userId)
         .then((user) => {
@@ -27,12 +27,16 @@ router.post('/board', passport.authenticate('jwt', { session: false }),
           Board.findOne({ where: { boardName } })
             .then((board) => {
               if (!board) return res.status(404).json({ message: 'Board not found!' });
-              board.createList([{ listName: 'To Do' }, { listName: 'In Progress' }, { listName: 'Coded' },
-                { listName: 'Testing' }, { listName: 'Done' }]).then((lists) => respArray.push(lists));
+              // board.createList([{ listName: 'To Do' }, { listName: 'In Progress' }, { listName: 'Coded' },
+              //   { listName: 'Testing' }, { listName: 'Done' }]).then((lists) => respArray.push(lists));
+              board.createList({ listName: 'To Do' }).then((lists) => response.listTodo = lists);
+              board.createList({ listName: 'In Progress' }).then((lists) => response.listInProgress = lists);
+              board.createList({ listName: 'Coded' }).then((lists) => response.listCoded = lists);
+              board.createList({ listName: 'Testing' }).then((lists) => response.listTesting = lists);
+              board.createList({ listName: 'Done' }).then((lists) => response.listDone = lists);
               user.addBoard(board, { through: { owner: true } }).then(() => {
-                respArray.push(board);
-                console.log(respArray);
-                res.send(board);
+                response.board = board;
+                res.status(200).send(response);
               });
               return null;
             });
@@ -51,6 +55,22 @@ router.get('/board', passport.authenticate('jwt', { session: false }), (req, res
         if (!user) return res.status(404).json({ message: 'User not found!' });
         user.getBoards().then((boards) => {
           res.send(boards);
+        });
+        return null;
+      });
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+});
+
+router.get('/board/lists/:id', passport.authenticate('jwt', { session: false }), (req, res) => {
+  try {
+    const boardId = req.params.id;
+    Board.findByPk(boardId)
+      .then((board) => {
+        if (!board) return res.status(404).json({ message: 'Board not found!' });
+        board.getLists().then((lists) => {
+          res.status(200).send(lists);
         });
         return null;
       });
