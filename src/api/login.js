@@ -95,7 +95,7 @@ router.post('/refresh', async (req, res, next) => {
     }
 
     if (!utils.verifyToken(refreshTokenData.token)) {
-      return res.status(401).json({ message: 'Invalid refresh token or token expired!' });
+      return res.status(406).json({ message: 'Invalid refresh token or token expired!' });
     }
 
     await RefreshToken.destroy({ where: { token: refreshToken } });

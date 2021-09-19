@@ -23,13 +23,12 @@ router.post('/task', passport.authenticate('jwt', { session: false }),
   (req, res) => {
     try {
       const {
-        boardId, listName, taskTitle, order, listId
+        taskTitle, order, listId
       } = req.body;
       List.findByPk(listId).then((list) => {
         if (!list) return res.status(404).json({ message: 'List not found!' });
         list.createTask({ taskTitle, order }).then((task) => {
           taskAction(task.dataValues.id, 'Adding a task');
-          // res.status(200).send(task);
           Task.findOne({ where: { id: task.dataValues.id }, include: { model: List } }).then((getTask) => {
             const newTask = getTask.get({ plain: true });
             res.status(200).send(newTask);
@@ -119,18 +118,16 @@ router.get('/task/search', passport.authenticate('jwt', { session: false }),
 
       if (taskTitle.charAt(0) === '@') {
         const subText = taskTitle.substring(1);
-
         Board.findByPk(boardId).then((board) => {
           if (!board) return res.status(404).json({ message: 'Board not found!' });
-          board.getTasks({ where: { archived: false } })
-            .then((tasks) => {
-              const taskIds = [];
-              tasks.forEach((task) => {
-                taskIds.push(task.dataValues.id);
-              });
-              Task.findAll({ where: { id: taskIds }, include: { model: User, where: { email: subText }, required: true } }).then((usertasks) => {
-                res.send(usertasks);
-              });
+          board.getLists({
+            include: [{
+              model: Task,
+              include: { model: User, where: { email: subText }, required: true }
+            }]
+          })
+            .then((listsTasks) => {
+              res.status(200).send(listsTasks);
             })
             .catch((err) => console.log(err));
           return null;
@@ -138,14 +135,17 @@ router.get('/task/search', passport.authenticate('jwt', { session: false }),
       } else {
         Board.findByPk(boardId).then((board) => {
           if (!board) return res.status(404).json({ message: 'Board not found!' });
-          board.getTasks({
-            where: {
-              taskTitle: { [Op.like]: `%${taskTitle}%` },
-              archived: false
-            }
+          board.getLists({
+            include: [{
+              model: Task,
+              where: {
+                taskTitle: { [Op.like]: `%${taskTitle}%` },
+                archived: false
+              }
+            }]
           })
-            .then((tasks) => {
-              res.send(tasks);
+            .then((listsTasks) => {
+              res.status(200).send(listsTasks);
             })
             .catch((err) => console.log(err));
           return null;
@@ -183,17 +183,17 @@ router.get('/task/executor:board', passport.authenticate('jwt', { session: false
   (req, res) => {
     try {
       const boardId = req.params;
+
       Board.findByPk(boardId.board).then((board) => {
         if (!board) return res.status(404).json({ message: 'Board not found!' });
-        board.getTasks({ where: { archived: false } })
-          .then((tasks) => {
-            const taskIds = [];
-            tasks.forEach((task) => {
-              taskIds.push(task.dataValues.id);
-            });
-            Task.findAll({ where: { id: taskIds }, include: { model: User, required: true } }).then((usertasks) => {
-              res.send(usertasks);
-            });
+        board.getLists({
+          include: [{
+            model: Task,
+            include: { model: User, required: true }
+          }]
+        })
+          .then((listsTasks) => {
+            res.status(200).send(listsTasks);
           })
           .catch((err) => console.log(err));
         return null;
@@ -267,39 +267,12 @@ router.get('/task/archive', passport.authenticate('jwt', { session: false }),
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
-    //   Board.findByPk(boardId).then((board) => {
-    //     if (!board) return res.status(404).json({ message: 'Board not found!' });
-    //     board.getTasks({ where: { archived: true } })
-    //       .then((tasks) => {
-    //         res.send(tasks);
-    //       })
-    //       .catch((err) => console.log(err));
-    //     return null;
-    //   });
-    // } catch (error) {
-    //   res.status(500).send({ message: error.message });
-    // }
   });
 
 router.put('/task/archive', passport.authenticate('jwt', { session: false }),
   (req, res) => {
     try {
       const { archivedTasks, listId } = req.body;
-
-      // Board.findByPk(boardId).then((board) => {
-      //   if (!board) return res.status(404).json({ message: 'Board not found!' });
-      //   board.getTasks({ where: { id: archivedTasks } })
-      //     .then((tasks) => {
-      //       tasks.forEach((task) => {
-      //         task.listName = listName;
-      //         task.archived = false;
-      //         task.save();
-      //       });
-      //       res.send(tasks);
-      //     })
-      //     .catch((err) => console.log(err));
-      //   return null;
-      // });
 
       Task.findAll({ where: { id: archivedTasks } }).then((tasks) => {
         if (!tasks) return res.status(404).json({ message: 'Tasks not found!' });
@@ -309,6 +282,7 @@ router.put('/task/archive', passport.authenticate('jwt', { session: false }),
           task.save();
         });
         res.status(200).send(tasks);
+        return null;
       });
       Taskexecutor.destroy({ where: { taskId: archivedTasks } }).catch((err) => console.log(err));
     } catch (error) {
@@ -349,21 +323,6 @@ router.get('/task/actions:board', passport.authenticate('jwt', { session: false 
     } catch (error) {
       res.status(500).send({ message: error.message });
     }
-
-    // try {
-    //   const boardId = req.params;
-    //   Board.findByPk(boardId.board).then((board) => {
-    //     if (!board) return res.status(404).json({ message: 'Board not found!' });
-    //     board.getTasks({ include: { model: TaskAction } })
-    //       .then((tasks) => {
-    //         res.send(tasks);
-    //       })
-    //       .catch((err) => console.log(err));
-    //     return null;
-    //   });
-    // } catch (error) {
-    //   res.status(500).send({ message: error.message });
-    // }
   });
 
 router.put('/task/list:taskId', passport.authenticate('jwt', { session: false }),
@@ -375,7 +334,6 @@ router.put('/task/list:taskId', passport.authenticate('jwt', { session: false })
       Task.findByPk(taskId.taskId).then((item) => {
         if (!item) return res.status(404).json({ message: 'Task not found!' });
         item.order = task.order;
-        // item.listName = task.listName;
         item.listId = listId;
         item.save();
         taskAction(taskId.taskId, 'Changing the task list');

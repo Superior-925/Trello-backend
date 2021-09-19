@@ -206,7 +206,7 @@ router.get('/board/rights', passport.authenticate('jwt', { session: false }), (r
 
     Userboards.findOne({ where: { userId, boardId } }).then((board) => {
       if (!board) return res.status(404).json({ message: 'Board not found!' });
-      res.send(board);
+      res.status(200).send(board);
       return null;
     });
   } catch (error) {

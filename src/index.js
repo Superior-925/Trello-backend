@@ -3,7 +3,7 @@ const morgan = require('morgan');
 const helmet = require('helmet');
 const cors = require('cors');
 require('dotenv').config();
-require('./auth/passport');
+//require('./auth/passport');
 const path = require('path');
 const passport = require('passport');
 
